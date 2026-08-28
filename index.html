@@ -100,7 +100,7 @@ body { margin: 0; }
   display: inline-flex; align-items: center; gap: 5px; background: #fff; border: 1px solid var(--line); color: var(--ink-soft);
   border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
 }
-.backup-btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.backup-btn-primary { background: #AEBECB; border-color: #AEBECB; color: var(--navy-dark); }
 .backup-btn-secondary { background: var(--purple-soft); border-color: var(--purple-soft); color: var(--purple-dark); }
 .hidden-file-input { display: none; }
 .import-error { width: 100%; font-size: 11.5px; color: var(--danger); }
@@ -744,10 +744,10 @@ function App() {
       {!openPuppy ? (
         <React.Fragment>
           <div className="stats-row">
-            <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--navy)", "--tile-soft": "var(--navy-soft)" }} onClick={() => setDueFilter(null)}>
+            <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--rose)", "--tile-soft": "var(--rose-soft)" }} onClick={() => setDueFilter(null)}>
               <span className="stat-icon">🐶</span><span className="stat-num">{puppies.length}</span><span className="stat-label">Всего щенков</span>
             </button>
-            <button className={`stat-tile ${dueFilter === "due" ? "active" : ""}`} style={{ "--tile-color": "var(--amber-dark)", "--tile-soft": "var(--amber-soft)" }} onClick={() => setDueFilter(dueFilter === "due" ? null : "due")}>
+            <button className={`stat-tile ${dueFilter === "due" ? "active" : ""}`} style={{ "--tile-color": "var(--amber)", "--tile-soft": "var(--amber-soft)" }} onClick={() => setDueFilter(dueFilter === "due" ? null : "due")}>
               <span className="stat-icon">⚠️</span><span className="stat-num">{dueCount}</span><span className="stat-label">Скоро/просрочено</span>
             </button>
             <button className={`stat-tile ${dueFilter === "quarantine" ? "active" : ""}`} style={{ "--tile-color": "var(--purple-dark)", "--tile-soft": "var(--purple-soft)" }} onClick={() => setDueFilter(dueFilter === "quarantine" ? null : "quarantine")}>
