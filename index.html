@@ -157,6 +157,7 @@ body { margin: 0; }
 .care-warning-overdue { background: #fde3e3; color: #b02a2a; }
 .care-warning-soon { background: #fff1d6; color: #9a6a00; }
 .care-warning-quarantine { background: var(--purple-soft); color: var(--purple-dark); }
+.care-warning-treatment { background: var(--rose-soft); color: var(--rose-dark); }
 
 .chip { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 700; text-transform: uppercase; border-radius: 999px; padding: 3px 8px; letter-spacing: 0.3px; white-space: nowrap; }
 .chip-muted { background: var(--bg-soft); color: var(--ink-soft); }
@@ -164,6 +165,7 @@ body { margin: 0; }
 .chip-warn { background: var(--amber-soft); color: #8C6A1F; }
 .chip-danger { background: var(--danger-soft); color: var(--danger); }
 .chip-purple { background: var(--purple-soft); color: var(--purple-dark); }
+.chip-navy { background: var(--navy-soft); color: var(--navy-dark); }
 
 .detail { background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; max-width: 720px; margin: 0 auto; }
 .detail-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
@@ -262,6 +264,9 @@ const ROW_STRIPE_CYCLE = ["var(--navy)", "var(--teal)", "var(--rose)", "var(--pu
 const VACC_TYPES = ["Вакцинация", "От глистов", "От блох/клещей"];
 const VACC_TYPE_ICON = { "Вакцинация": "💉", "От глистов": "🪱", "От блох/клещей": "🧴" };
 const VACC_TYPE_TONE = { "Вакцинация": "good", "От глистов": "purple", "От блох/клещей": "purple" };
+const TREATMENT_TYPES = ["Препарат", "Укол", "Капельница"];
+const TREATMENT_TYPE_ICON = { "Препарат": "💊", "Укол": "💉", "Капельница": "💧" };
+const TREATMENT_TYPE_TONE = { "Препарат": "purple", "Укол": "danger", "Капельница": "navy" };
 const QUARANTINE_DAYS = 14;
 
 function todayISO() { return new Date().toISOString().slice(0, 10); }
@@ -301,13 +306,14 @@ function blankPuppy() {
     weight: "",
     notes: "",
     log: [],
+    treatments: [],
     createdAt: todayISO(),
   };
 }
 
 function normalizeLoaded(parsed) {
   const puppies = Array.isArray(parsed) ? parsed : (parsed.puppies || []);
-  return { puppies: puppies.map((p) => ({ log: [], ...p })) };
+  return { puppies: puppies.map((p) => ({ log: [], treatments: [], ...p })) };
 }
 
 function useDB() {
@@ -378,6 +384,12 @@ function quarantineInfo(puppy) {
   return { until: end };
 }
 
+function activeTreatmentToday(puppy) {
+  const today = todayISO();
+  const list = (puppy.treatments || []).filter((t) => t.date === today);
+  return list.length ? list.length : null;
+}
+
 function nextDueInfo(puppy, daysAhead = 30) {
   const today = todayISO();
   const future = addDays(today, daysAhead);
@@ -395,8 +407,12 @@ function nextDueInfo(puppy, daysAhead = 30) {
 function CareWarningBadges({ puppy }) {
   const due = nextDueInfo(puppy);
   const quarantine = quarantineInfo(puppy);
+  const treatmentCount = activeTreatmentToday(puppy);
   return (
     <React.Fragment>
+      {treatmentCount && (
+        <div className="care-warning care-warning-treatment">🩺 На лечении сегодня · {treatmentCount} {treatmentCount === 1 ? "запись" : "записи"}</div>
+      )}
       {due && (
         <div className={`care-warning ${due.overdue ? "care-warning-overdue" : "care-warning-soon"}`}>
           ⚠️ {due.overdue ? "Просрочено" : "Скоро"}: {due.type.toLowerCase()} · {fmtDate(due.date)}
@@ -431,6 +447,65 @@ function PuppyRow({ puppy, index, onOpen }) {
 
 function Field({ label, children }) {
   return <label className="field"><span className="field-label">{label}</span>{children}</label>;
+}
+
+function TreatmentSection({ list, onAdd, onRemove }) {
+  const [date, setDate] = useState(todayISO());
+  const [time, setTime] = useState("");
+  const [type, setType] = useState(TREATMENT_TYPES[0]);
+  const [name, setName] = useState("");
+  const [dosage, setDosage] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const add = () => {
+    if (!name.trim()) return;
+    onAdd({
+      id: uid("t"), date, time, type, name: name.trim(),
+      dosage: dosage.trim(), notes: notes.trim(),
+    });
+    setName(""); setDosage(""); setNotes(""); setTime("");
+  };
+
+  const sorted = list.slice().sort((a, b) => {
+    const ak = `${a.date} ${a.time || "00:00"}`;
+    const bk = `${b.date} ${b.time || "00:00"}`;
+    return ak < bk ? 1 : -1;
+  });
+
+  return (
+    <div className="section">
+      <div className="section-title">🩺 Текущее лечение</div>
+      <div className="log-list">
+        {sorted.length === 0 && <div className="empty-hint">Записей о лечении ещё нет.</div>}
+        {sorted.map((e) => (
+          <div key={e.id} className="log-row">
+            <span className="log-date">{fmtDate(e.date)}{e.time ? ` · ${e.time}` : ""}</span>
+            <Chip tone={TREATMENT_TYPE_TONE[e.type] || "muted"}>{TREATMENT_TYPE_ICON[e.type]} {e.type}</Chip>
+            <span className="log-text">
+              {e.name}{e.dosage ? ` · ${e.dosage}` : ""}
+            </span>
+            <button className="icon-btn" onClick={() => onRemove(e.id)}>✕</button>
+            {e.notes && <div className="log-sub">{e.notes}</div>}
+          </div>
+        ))}
+      </div>
+      <div className="add-row">
+        <input type="date" className="input input-date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <input type="time" className="input input-date" value={time} onChange={(e) => setTime(e.target.value)} />
+        <select className="input" value={type} onChange={(e) => setType(e.target.value)}>
+          {TREATMENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="add-row">
+        <input className="input" placeholder="препарат (напр. Гамавит, физраствор...)" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="input" placeholder="доза / объём" value={dosage} onChange={(e) => setDosage(e.target.value)} />
+      </div>
+      <div className="add-row">
+        <input className="input" placeholder="заметка (реакция, кто выполнил...)" value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </div>
+      <button className="add-btn add-btn-primary" style={{ marginTop: 8 }} onClick={add}>➕ Добавить запись</button>
+    </div>
+  );
 }
 
 function VaccinationLog({ list, onAdd, onRemove }) {
@@ -516,6 +591,8 @@ function PuppyDetail({ puppy, onBack, onUpdate, onDelete }) {
 
   const addLog = (entry) => commitNow({ log: [...(local.log || []), entry] });
   const removeLog = (id) => commitNow({ log: (local.log || []).filter((e) => e.id !== id) });
+  const addTreatment = (entry) => commitNow({ treatments: [...(local.treatments || []), entry] });
+  const removeTreatment = (id) => commitNow({ treatments: (local.treatments || []).filter((e) => e.id !== id) });
 
   return (
     <div className="detail">
@@ -550,6 +627,8 @@ function PuppyDetail({ puppy, onBack, onUpdate, onDelete }) {
             <input className="input" defaultValue={local.weight} onChange={(e) => commitDebounced("weight", { weight: e.target.value })} onBlur={() => timers.current.weight && timers.current.weight.flush()} placeholder="напр. 3.2" />
           </Field>
         </div>
+
+        <TreatmentSection list={local.treatments || []} onAdd={addTreatment} onRemove={removeTreatment} />
 
         <VaccinationLog list={local.log || []} onAdd={addLog} onRemove={removeLog} />
 
@@ -747,7 +826,7 @@ function App() {
             <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--rose)", "--tile-soft": "var(--navy-soft)" }} onClick={() => setDueFilter(null)}>
               <span className="stat-icon">🐶</span><span className="stat-num">{puppies.length}</span><span className="stat-label">Всего щенков</span>
             </button>
-            <button className={`stat-tile ${dueFilter === "due" ? "active" : ""}`} style={{ "--tile-color": "var(--amber)", "--tile-soft": "var(--amber-soft)" }} onClick={() => setDueFilter(dueFilter === "due" ? null : "due")}>
+            <button className={`stat-tile ${dueFilter === "due" ? "active" : ""}`} style={{ "--tile-color": "#F0B93D", "--tile-soft": "#FDF0CC" }} onClick={() => setDueFilter(dueFilter === "due" ? null : "due")}>
               <span className="stat-icon">⚠️</span><span className="stat-num">{dueCount}</span><span className="stat-label">Скоро/просрочено</span>
             </button>
             <button className={`stat-tile ${dueFilter === "quarantine" ? "active" : ""}`} style={{ "--tile-color": "var(--purple-dark)", "--tile-soft": "var(--purple-soft)" }} onClick={() => setDueFilter(dueFilter === "quarantine" ? null : "quarantine")}>
