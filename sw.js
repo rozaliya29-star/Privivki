@@ -1,4 +1,4 @@
-const CACHE_NAME = "privivki-v1";
+const CACHE_NAME = "privivki-v2";
 const CORE_ASSETS = ["./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -16,12 +16,12 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Network-first: всегда пытаемся взять свежую версию из сети,
-// и только если сети нет — отдаём то, что лежит в кэше.
+// Network-first, и обязательно cache:"no-store" — иначе fetch() может сам
+// вернуть ответ из HTTP-кэша Safari, даже если мы явно просим "из сети".
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: "no-store" })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
