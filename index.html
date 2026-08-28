@@ -69,7 +69,7 @@ body { margin: 0; }
   margin: 0 auto;
 }
 .loading-shell { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
-.loading-text { font-family: 'Fraunces', serif; font-weight: 600; color: var(--teal-dark); font-size: 17px; }
+.loading-text { font-family: 'Fraunces', serif; font-weight: 600; color: var(--navy); font-size: 17px; }
 
 .app-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -78,11 +78,11 @@ body { margin: 0; }
   background: linear-gradient(135deg, var(--header-start), var(--header-end));
 }
 .app-header-left { display: flex; align-items: center; gap: 12px; }
-.app-icon { background: #fff; color: var(--teal-dark); width: 42px; height: 42px; border-radius: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; box-shadow: 0 3px 8px -3px rgba(52,65,79,0.25); }
+.app-icon { background: #fff; color: var(--purple); width: 42px; height: 42px; border-radius: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; box-shadow: 0 3px 8px -3px rgba(52,65,79,0.25); }
 .app-title { font-family: 'Fraunces', serif; font-weight: 700; font-size: 21px; color: var(--ink); letter-spacing: -0.3px; line-height: 1.15; }
 .app-subtitle { font-size: 12px; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
-.retry-btn { background: var(--teal-dark); color: #fff; border: none; border-radius: 999px; padding: 5px 10px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer; }
-.bell-btn { background: #fff; border: none; color: var(--teal-dark); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; position: relative; box-shadow: 0 3px 8px -3px rgba(52,65,79,0.25); }
+.retry-btn { background: var(--navy); color: #fff; border: none; border-radius: 999px; padding: 5px 10px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.bell-btn { background: #fff; border: none; color: var(--navy); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; position: relative; box-shadow: 0 3px 8px -3px rgba(52,65,79,0.25); }
 .bell-dot { position: absolute; top: 6px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--rose); border: 1.5px solid #fff; }
 
 .error-banner {
@@ -100,15 +100,15 @@ body { margin: 0; }
   display: inline-flex; align-items: center; gap: 5px; background: #fff; border: 1px solid var(--line); color: var(--ink-soft);
   border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
 }
-.backup-btn-primary { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+.backup-btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; }
 .backup-btn-secondary { background: var(--purple-soft); border-color: var(--purple-soft); color: var(--purple-dark); }
 .hidden-file-input { display: none; }
 .import-error { width: 100%; font-size: 11.5px; color: var(--danger); }
 
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
-.stat-tile { display: flex; flex-direction: column; gap: 8px; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--tile-color, var(--teal)); border-radius: 14px; padding: 9px 10px 11px; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; box-shadow: 0 3px 10px -4px rgba(43,51,59,0.16); }
-.stat-tile.active { border-color: var(--tile-color, var(--teal)); background: var(--tile-soft, var(--teal-soft)); }
-.stat-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--tile-soft, var(--teal-soft)); color: var(--tile-color, var(--teal)); }
+.stat-tile { display: flex; flex-direction: column; gap: 8px; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--tile-color, var(--navy)); border-radius: 14px; padding: 9px 10px 11px; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; box-shadow: 0 3px 10px -4px rgba(43,51,59,0.16); }
+.stat-tile.active { border-color: var(--tile-color, var(--navy)); background: var(--tile-soft, var(--navy-soft)); }
+.stat-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--tile-soft, var(--navy-soft)); color: var(--tile-color, var(--navy)); }
 .stat-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 19px; color: var(--ink); line-height: 1; }
 .stat-label { font-size: 10.5px; color: var(--ink-soft); line-height: 1.25; }
 
@@ -133,20 +133,20 @@ body { margin: 0; }
   background: #fff; border: 1px solid var(--line); border-radius: 10px;
   padding: 8px 10px; font-size: 14px; font-family: 'Inter', sans-serif; color: var(--ink); outline: none;
 }
-.input:focus { border-color: var(--teal-dark); }
+.input:focus { border-color: var(--navy); }
 .input-date { max-width: 150px; }
 .textarea { width: 100%; resize: vertical; font-family: 'Inter', sans-serif; }
 
 .add-btn {
-  display: inline-flex; align-items: center; gap: 6px; background: var(--teal-soft); border: 1px solid var(--teal-soft);
-  color: var(--teal-dark); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; background: var(--purple-soft); border: 1px solid var(--purple-soft);
+  color: var(--purple-dark); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
-.add-btn-primary { background: var(--teal-dark); color: #fff; border-color: var(--teal-dark); width: 100%; justify-content: center; padding: 12px 14px; font-size: 14px; }
+.add-btn-primary { background: var(--purple); color: #fff; border-color: var(--purple); width: 100%; justify-content: center; padding: 12px 14px; font-size: 14px; }
 .add-btn-small { padding: 6px 11px; font-size: 12px; }
 
 .list-col { display: flex; flex-direction: column; gap: 8px; }
-.list-row { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; cursor: pointer; text-align: left; width: 100%; font-family: 'Inter', sans-serif; border-left: 4px solid var(--stripe, var(--teal)); }
-.list-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--teal-soft); color: var(--teal-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; }
+.list-row { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; cursor: pointer; text-align: left; width: 100%; font-family: 'Inter', sans-serif; border-left: 4px solid var(--stripe, var(--navy)); }
+.list-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--bg-soft); color: var(--ink-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; }
 .list-body { flex: 1; min-width: 0; }
 .list-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15.5px; color: var(--ink); }
 .list-meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 1px; }
@@ -166,14 +166,14 @@ body { margin: 0; }
 .chip-purple { background: var(--purple-soft); color: var(--purple-dark); }
 
 .detail { background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; max-width: 720px; margin: 0 auto; }
-.detail-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: linear-gradient(135deg, var(--header-start), var(--header-end)); }
+.detail-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
 .detail-topbar-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink); }
-.back-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--teal-dark); border: none; color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px -3px rgba(30,156,141,0.45); }
+.back-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--navy); border: none; color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px -3px rgba(52,65,79,0.45); }
 .round-icon-btn { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid var(--line); color: var(--ink); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
 .detail-body { padding: 20px; }
 .detail-name-input { font-family: 'Fraunces', serif; font-weight: 700; font-size: 24px; background: transparent; border: none; outline: none; border-bottom: 2px solid transparent; color: var(--ink); padding: 2px 0; width: 100%; margin-bottom: 14px; }
-.detail-name-input:focus { border-bottom-color: var(--teal-dark); }
+.detail-name-input:focus { border-bottom-color: var(--navy); }
 
 .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
 .field { display: flex; flex-direction: column; gap: 5px; }
@@ -200,7 +200,7 @@ body { margin: 0; }
 .delete-btn-confirm { background: var(--danger); color: #fff; border: none; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
 .cancel-btn { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: var(--ink); }
 
-.fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 50%; background: var(--teal-dark); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; border: none; cursor: pointer; box-shadow: 0 8px 18px -6px rgba(30,156,141,0.6); z-index: 40; }
+.fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 50%; background: var(--rose); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; border: none; cursor: pointer; box-shadow: 0 8px 18px -6px rgba(232,116,154,0.6); z-index: 40; }
 
 @media (max-width: 480px) {
   .app-title { font-size: 19.5px; }
@@ -257,6 +257,8 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const DOC_REF = db.collection("privivki").doc("main");
 
+const SEX_OPTIONS = ["неизвестно", "кобель", "сука"];
+const ROW_STRIPE_CYCLE = ["var(--navy)", "var(--teal)", "var(--rose)", "var(--purple)", "var(--amber)", "var(--slate)"];
 const VACC_TYPES = ["Вакцинация", "От глистов", "От блох/клещей"];
 const VACC_TYPE_ICON = { "Вакцинация": "💉", "От глистов": "🪱", "От блох/клещей": "🧴" };
 const VACC_TYPE_TONE = { "Вакцинация": "good", "От глистов": "purple", "От блох/клещей": "purple" };
@@ -293,7 +295,8 @@ function blankPuppy() {
   return {
     id: uid("pup"),
     name: "Новый щенок",
-    breed: "",
+    sex: "неизвестно",
+    color: "",
     birthDate: "",
     weight: "",
     notes: "",
@@ -406,14 +409,16 @@ function CareWarningBadges({ puppy }) {
   );
 }
 
-function PuppyRow({ puppy, onOpen }) {
+function PuppyRow({ puppy, index, onOpen }) {
   const age = ageFromBirth(puppy.birthDate);
+  const stripe = ROW_STRIPE_CYCLE[index % ROW_STRIPE_CYCLE.length];
+  const sexIcon = puppy.sex === "сука" ? "♀" : puppy.sex === "кобель" ? "♂" : "🐶";
   return (
-    <button className="list-row" onClick={() => onOpen(puppy.id)}>
-      <div className="list-icon">🐶</div>
+    <button className="list-row" style={{ "--stripe": stripe }} onClick={() => onOpen(puppy.id)}>
+      <div className="list-icon">{sexIcon}</div>
       <div className="list-body">
         <div className="list-name">{puppy.name}</div>
-        <div className="list-meta">{[puppy.breed, age].filter(Boolean).join(" · ") || "нет данных"}</div>
+        <div className="list-meta">{[puppy.sex !== "неизвестно" ? puppy.sex : "", puppy.color, age].filter(Boolean).join(" · ") || "нет данных"}</div>
         <CareWarningBadges puppy={puppy} />
       </div>
       <div className="list-right">
@@ -530,8 +535,13 @@ function PuppyDetail({ puppy, onBack, onUpdate, onDelete }) {
         <CareWarningBadges puppy={local} />
 
         <div className="detail-grid">
-          <Field label="Порода">
-            <input className="input" defaultValue={local.breed} onChange={(e) => commitDebounced("breed", { breed: e.target.value })} onBlur={() => timers.current.breed && timers.current.breed.flush()} placeholder="напр. дворняга" />
+          <Field label="Пол">
+            <select className="input" value={local.sex} onChange={(e) => commitNow({ sex: e.target.value })}>
+              {SEX_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Field>
+          <Field label="Окрас">
+            <input className="input" defaultValue={local.color} onChange={(e) => commitDebounced("color", { color: e.target.value })} onBlur={() => timers.current.color && timers.current.color.flush()} placeholder="напр. чёрно-белый" />
           </Field>
           <Field label="Дата рождения (примерно)">
             <input type="date" className="input" defaultValue={local.birthDate} onChange={(e) => commitDebounced("birthDate", { birthDate: e.target.value })} onBlur={() => timers.current.birthDate && timers.current.birthDate.flush()} />
@@ -734,7 +744,7 @@ function App() {
       {!openPuppy ? (
         <React.Fragment>
           <div className="stats-row">
-            <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--teal-dark)", "--tile-soft": "var(--teal-soft)" }} onClick={() => setDueFilter(null)}>
+            <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--navy)", "--tile-soft": "var(--navy-soft)" }} onClick={() => setDueFilter(null)}>
               <span className="stat-icon">🐶</span><span className="stat-num">{puppies.length}</span><span className="stat-label">Всего щенков</span>
             </button>
             <button className={`stat-tile ${dueFilter === "due" ? "active" : ""}`} style={{ "--tile-color": "var(--amber-dark)", "--tile-soft": "var(--amber-soft)" }} onClick={() => setDueFilter(dueFilter === "due" ? null : "due")}>
@@ -753,7 +763,7 @@ function App() {
           </div>
 
           <div className="list-col">
-            {filtered.map((p) => <PuppyRow key={p.id} puppy={p} onOpen={setOpenId} />)}
+            {filtered.map((p, i) => <PuppyRow key={p.id} puppy={p} index={i} onOpen={setOpenId} />)}
             {filtered.length === 0 && <div className="empty-hint" style={{ padding: 24 }}>Ничего не найдено. Нажмите ➕, чтобы добавить щенка.</div>}
           </div>
 
