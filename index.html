@@ -744,7 +744,7 @@ function App() {
       {!openPuppy ? (
         <React.Fragment>
           <div className="stats-row">
-            <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--rose)", "--tile-soft": "var(--rose-soft)" }} onClick={() => setDueFilter(null)}>
+            <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--rose)", "--tile-soft": "var(--navy-soft)" }} onClick={() => setDueFilter(null)}>
               <span className="stat-icon">🐶</span><span className="stat-num">{puppies.length}</span><span className="stat-label">Всего щенков</span>
             </button>
             <button className={`stat-tile ${dueFilter === "due" ? "active" : ""}`} style={{ "--tile-color": "var(--amber)", "--tile-soft": "var(--amber-soft)" }} onClick={() => setDueFilter(dueFilter === "due" ? null : "due")}>
