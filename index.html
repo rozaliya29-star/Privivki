@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Журнал прививок</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1E9C8D">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Прививки">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script>
+  window.__loadFails = [];
+  function __scriptFail(name) { window.__loadFails.push(name); }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" onerror="__scriptFail('react')"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" onerror="__scriptFail('react-dom')"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" onerror="__scriptFail('babel-standalone')"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js" onerror="__scriptFail('firebase-app-compat')"></script>
+<script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js" onerror="__scriptFail('firebase-firestore-compat')"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+:root {
+  --bg: #FFFFFF;
+  --bg-soft: #F6F7F9;
+  --ink: #2B333B;
+  --ink-soft: #8A93A0;
+  --ink-faint: #C0C6CE;
+  --line: #E8EBEF;
+  --navy: #47586B;
+  --navy-dark: #34414F;
+  --navy-soft: #E7EBEF;
+  --header-start: #DFF7F4;
+  --header-end: #B7E4DC;
+  --rose: #E8749A;
+  --rose-dark: #C85778;
+  --rose-soft: #FCE7EE;
+  --teal: #2FBFAE;
+  --teal-dark: #1E9C8D;
+  --teal-soft: #DFF7F4;
+  --purple: #9B87D6;
+  --purple-dark: #7C64C4;
+  --purple-soft: #EFEAFC;
+  --amber: #E0A438;
+  --amber-dark: #B9821F;
+  --amber-soft: #FBF0DC;
+  --slate: #8A93A0;
+  --slate-soft: #EDF0F2;
+  --danger: var(--rose-dark);
+  --danger-soft: var(--rose-soft);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  padding: calc(16px + env(safe-area-inset-top)) 16px 60px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.loading-shell { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+.loading-text { font-family: 'Fraunces', serif; font-weight: 600; color: var(--teal-dark); font-size: 17px; }
+
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; margin: 0 0 14px;
+  border-radius: 20px; gap: 10px; flex-wrap: wrap;
+  background: linear-gradient(135deg, var(--header-start), var(--header-end));
+}
+.app-header-left { display: flex; align-items: center; gap: 12px; }
+.app-icon { background: #fff; color: var(--teal-dark); width: 42px; height: 42px; border-radius: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; box-shadow: 0 3px 8px -3px rgba(52,65,79,0.25); }
+.app-title { font-family: 'Fraunces', serif; font-weight: 700; font-size: 21px; color: var(--ink); letter-spacing: -0.3px; line-height: 1.15; }
+.app-subtitle { font-size: 12px; color: var(--ink-soft); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.retry-btn { background: var(--teal-dark); color: #fff; border: none; border-radius: 999px; padding: 5px 10px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.bell-btn { background: #fff; border: none; color: var(--teal-dark); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; position: relative; box-shadow: 0 3px 8px -3px rgba(52,65,79,0.25); }
+.bell-dot { position: absolute; top: 6px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--rose); border: 1.5px solid #fff; }
+
+.error-banner {
+  display: flex; align-items: center; gap: 8px; background: var(--danger-soft); border: 1px solid var(--danger);
+  color: var(--danger); border-radius: 12px; padding: 10px 14px; font-size: 12.5px; margin: 14px 0; line-height: 1.4;
+}
+.local-banner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px; background: var(--amber-soft); border: 1px solid var(--amber);
+  color: #7A5B00; border-radius: 14px; padding: 12px 14px; font-size: 12.5px; margin: 14px 0; line-height: 1.4;
+}
+.local-banner-text { flex: 1; min-width: 180px; }
+.backup-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.backup-actions-inline { margin: 14px 0 0; }
+.backup-btn {
+  display: inline-flex; align-items: center; gap: 5px; background: #fff; border: 1px solid var(--line); color: var(--ink-soft);
+  border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.backup-btn-primary { background: var(--teal-dark); border-color: var(--teal-dark); color: #fff; }
+.backup-btn-secondary { background: var(--purple-soft); border-color: var(--purple-soft); color: var(--purple-dark); }
+.hidden-file-input { display: none; }
+.import-error { width: 100%; font-size: 11.5px; color: var(--danger); }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
+.stat-tile { display: flex; flex-direction: column; gap: 8px; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--tile-color, var(--teal)); border-radius: 14px; padding: 9px 10px 11px; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; box-shadow: 0 3px 10px -4px rgba(43,51,59,0.16); }
+.stat-tile.active { border-color: var(--tile-color, var(--teal)); background: var(--tile-soft, var(--teal-soft)); }
+.stat-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--tile-soft, var(--teal-soft)); color: var(--tile-color, var(--teal)); }
+.stat-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 19px; color: var(--ink); line-height: 1; }
+.stat-label { font-size: 10.5px; color: var(--ink-soft); line-height: 1.25; }
+
+.notif-overlay { position: fixed; inset: 0; background: rgba(30,35,45,0.42); display: flex; align-items: flex-start; justify-content: center; padding: 64px 14px 14px; z-index: 60; }
+.notif-panel { background: #fff; border-radius: 18px; width: 100%; max-width: 420px; max-height: 78vh; overflow-y: auto; box-shadow: 0 24px 60px -12px rgba(20,25,35,0.35); }
+.notif-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 12px; font-family: 'Fraunces', serif; font-weight: 700; font-size: 17px; color: var(--ink); border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; }
+.notif-body { padding: 6px 14px 16px; }
+.notif-section { margin-top: 14px; }
+.notif-section-title { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); margin-bottom: 6px; padding-left: 2px; }
+.notif-section-today .notif-section-title { color: var(--rose-dark); }
+.notif-section-soon .notif-section-title { color: var(--purple-dark); }
+.notif-section-overdue .notif-section-title { color: var(--danger); }
+.notif-row { width: 100%; display: flex; align-items: center; gap: 10px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; margin-bottom: 6px; }
+.notif-row-text { flex: 1; font-size: 13.5px; color: var(--ink); font-weight: 600; }
+.notif-row-date { color: var(--ink-faint); font-size: 11.5px; white-space: nowrap; }
+
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.search-box { display: flex; align-items: center; gap: 6px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; flex: 1; min-width: 200px; color: var(--ink-faint); }
+.search-input { border: none; background: transparent; outline: none; flex: 1; font-size: 14px; color: var(--ink); font-family: 'Inter', sans-serif; }
+
+.input {
+  background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 10px; font-size: 14px; font-family: 'Inter', sans-serif; color: var(--ink); outline: none;
+}
+.input:focus { border-color: var(--teal-dark); }
+.input-date { max-width: 150px; }
+.textarea { width: 100%; resize: vertical; font-family: 'Inter', sans-serif; }
+
+.add-btn {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--teal-soft); border: 1px solid var(--teal-soft);
+  color: var(--teal-dark); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.add-btn-primary { background: var(--teal-dark); color: #fff; border-color: var(--teal-dark); width: 100%; justify-content: center; padding: 12px 14px; font-size: 14px; }
+.add-btn-small { padding: 6px 11px; font-size: 12px; }
+
+.list-col { display: flex; flex-direction: column; gap: 8px; }
+.list-row { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; cursor: pointer; text-align: left; width: 100%; font-family: 'Inter', sans-serif; border-left: 4px solid var(--stripe, var(--teal)); }
+.list-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--teal-soft); color: var(--teal-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 19px; }
+.list-body { flex: 1; min-width: 0; }
+.list-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15.5px; color: var(--ink); }
+.list-meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 1px; }
+.list-chevron { color: var(--ink-faint); font-size: 16px; flex-shrink: 0; }
+.list-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+
+.care-warning { margin-top: 6px; font-size: 11px; font-weight: 700; padding: 5px 8px; border-radius: 8px; line-height: 1.3; display: inline-block; }
+.care-warning-overdue { background: #fde3e3; color: #b02a2a; }
+.care-warning-soon { background: #fff1d6; color: #9a6a00; }
+.care-warning-quarantine { background: var(--purple-soft); color: var(--purple-dark); }
+
+.chip { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 700; text-transform: uppercase; border-radius: 999px; padding: 3px 8px; letter-spacing: 0.3px; white-space: nowrap; }
+.chip-muted { background: var(--bg-soft); color: var(--ink-soft); }
+.chip-good { background: var(--teal-soft); color: var(--teal-dark); }
+.chip-warn { background: var(--amber-soft); color: #8C6A1F; }
+.chip-danger { background: var(--danger-soft); color: var(--danger); }
+.chip-purple { background: var(--purple-soft); color: var(--purple-dark); }
+
+.detail { background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; max-width: 720px; margin: 0 auto; }
+.detail-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: linear-gradient(135deg, var(--header-start), var(--header-end)); }
+.detail-topbar-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink); }
+.back-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--teal-dark); border: none; color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px -3px rgba(30,156,141,0.45); }
+.round-icon-btn { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid var(--line); color: var(--ink); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+.detail-body { padding: 20px; }
+.detail-name-input { font-family: 'Fraunces', serif; font-weight: 700; font-size: 24px; background: transparent; border: none; outline: none; border-bottom: 2px solid transparent; color: var(--ink); padding: 2px 0; width: 100%; margin-bottom: 14px; }
+.detail-name-input:focus { border-bottom-color: var(--teal-dark); }
+
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field-label { font-size: 11px; color: var(--ink); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.75; }
+
+.section { margin-top: 14px; padding: 16px 14px 18px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 2px 8px -4px rgba(43,51,59,0.1); }
+.section-title { display: flex; align-items: center; gap: 6px; font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px; color: var(--ink); margin-bottom: 12px; }
+
+.log-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.log-row { display: flex; align-items: center; gap: 8px; background: var(--bg-soft); border-radius: 10px; padding: 8px 10px; font-size: 13px; flex-wrap: wrap; }
+.log-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-soft); white-space: nowrap; }
+.log-text { flex: 1; color: var(--ink); min-width: 100px; }
+.log-sub { font-size: 11.5px; color: var(--ink-soft); width: 100%; }
+.icon-btn { background: none; border: none; color: var(--ink-faint); cursor: pointer; padding: 2px; display: flex; font-size: 13px; }
+.icon-btn:hover { color: var(--danger); }
+.empty-hint { font-size: 12px; color: var(--ink-faint); font-style: italic; }
+
+.add-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.add-row .input { flex: 1; min-width: 110px; }
+
+.danger-zone { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--line); }
+.delete-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: var(--danger); border: none; color: #fff; border-radius: 999px; padding: 13px 14px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.confirm-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--danger); }
+.delete-btn-confirm { background: var(--danger); color: #fff; border: none; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.cancel-btn { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; color: var(--ink); }
+
+.fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); width: 56px; height: 56px; border-radius: 50%; background: var(--teal-dark); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; border: none; cursor: pointer; box-shadow: 0 8px 18px -6px rgba(30,156,141,0.6); z-index: 40; }
+
+@media (max-width: 480px) {
+  .app-title { font-size: 19.5px; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  window.addEventListener("error", function (e) {
+    var root = document.getElementById("root");
+    if (root && !root.hasChildNodes()) {
+      var stack = (e.error && e.error.stack) ? e.error.stack : "";
+      var fails = window.__loadFails && window.__loadFails.length
+        ? '<br><br><b>Не загрузились файлы:</b> ' + window.__loadFails.join(", ")
+        : '';
+      root.innerHTML =
+        '<div style="font-family: sans-serif; padding: 20px; color: #a33; background: #fff3f3; margin: 16px; border-radius: 12px; line-height:1.5; white-space: pre-wrap; word-break: break-word;">' +
+        '<b>Ошибка загрузки приложения</b><br><br>' +
+        (e.message || "Неизвестная ошибка") +
+        fails +
+        '<br><br><span style="color:#888; font-size: 13px;">Файл: ' + (e.filename || "?") + ", строка " + (e.lineno || "?") + '</span>' +
+        (stack ? '<br><br><span style="color:#888; font-size: 12px;">' + stack + '</span>' : '') +
+        '</div>';
+    }
+  });
+  window.addEventListener("load", function () {
+    setTimeout(function () {
+      var root = document.getElementById("root");
+      if (root && !root.hasChildNodes()) {
+        var fails = window.__loadFails && window.__loadFails.length
+          ? '<br><br><b>Не загрузились файлы:</b> ' + window.__loadFails.join(", ")
+          : '<br><br>Явной ошибки не зафиксировано — вероятно, проблема в самом коде приложения.';
+        root.innerHTML =
+          '<div style="font-family: sans-serif; padding: 20px; color: #a33; background: #fff3f3; margin: 16px; border-radius: 12px; line-height:1.5;">' +
+          '<b>Приложение не открылось</b>' + fails + '</div>';
+      }
+    }, 3000);
+  });
+</script>
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* Тот же проект Firebase, что и у DOG-TRACKER — просто отдельная коллекция */
+const firebaseConfig = {
+  apiKey: "AIzaSyDsfyI5kGKatp36bzDLn81X7ONHhqfCrbQ",
+  authDomain: "dog-tracker-778c0.firebaseapp.com",
+  projectId: "dog-tracker-778c0",
+  storageBucket: "dog-tracker-778c0.firebasestorage.app",
+  messagingSenderId: "1022922333620",
+  appId: "1:1022922333620:web:074273a9c295861f1ae6e1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const DOC_REF = db.collection("privivki").doc("main");
+
+const VACC_TYPES = ["Вакцинация", "От глистов", "От блох/клещей"];
+const VACC_TYPE_ICON = { "Вакцинация": "💉", "От глистов": "🪱", "От блох/клещей": "🧴" };
+const VACC_TYPE_TONE = { "Вакцинация": "good", "От глистов": "purple", "От блох/клещей": "purple" };
+const QUARANTINE_DAYS = 14;
+
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function uid(prefix) { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`; }
+function fmtDate(d) {
+  if (!d) return "";
+  const [y, m, day] = d.split("-");
+  const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  return `${day} ${months[parseInt(m, 10) - 1]} ${y}`;
+}
+function addDays(dateStr, days) {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+function ageFromBirth(birthDate) {
+  if (!birthDate) return "";
+  const b = new Date(birthDate);
+  const now = new Date();
+  let months = (now.getFullYear() - b.getFullYear()) * 12 + (now.getMonth() - b.getMonth());
+  if (now.getDate() < b.getDate()) months -= 1;
+  if (months < 0) return "";
+  if (months < 1) return "меньше месяца";
+  if (months < 12) return `${months} мес.`;
+  const years = Math.floor(months / 12);
+  const rem = months % 12;
+  return rem ? `${years} г. ${rem} мес.` : `${years} г.`;
+}
+
+function blankPuppy() {
+  return {
+    id: uid("pup"),
+    name: "Новый щенок",
+    breed: "",
+    birthDate: "",
+    weight: "",
+    notes: "",
+    log: [],
+    createdAt: todayISO(),
+  };
+}
+
+function normalizeLoaded(parsed) {
+  const puppies = Array.isArray(parsed) ? parsed : (parsed.puppies || []);
+  return { puppies: puppies.map((p) => ({ log: [], ...p })) };
+}
+
+function useDB() {
+  const [puppies, setPuppies] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saveState, setSaveState] = useState("idle");
+  const [storageAvailable, setStorageAvailable] = useState(true);
+  const latest = useRef(null);
+
+  const persist = useCallback((next) => {
+    latest.current = next;
+    setPuppies(next.puppies);
+    setSaveState("saving");
+    DOC_REF.set(next)
+      .then(() => {
+        setSaveState("saved");
+        setTimeout(() => setSaveState((s) => (s === "saved" ? "idle" : s)), 1200);
+      })
+      .catch((e) => { console.error("Не удалось сохранить:", e); setSaveState("error"); });
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = DOC_REF.onSnapshot(
+      (snap) => {
+        setStorageAvailable(true);
+        if (snap.exists) {
+          const loaded = normalizeLoaded(snap.data());
+          latest.current = loaded;
+          setPuppies(loaded.puppies);
+        } else {
+          const seeded = { puppies: [] };
+          latest.current = seeded;
+          setPuppies(seeded.puppies);
+          DOC_REF.set(seeded).catch((e) => console.error("Не удалось создать базу:", e));
+        }
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Firestore недоступен:", err);
+        setStorageAvailable(false);
+        setSaveState("local");
+        if (!latest.current) {
+          latest.current = { puppies: [] };
+          setPuppies([]);
+        }
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
+  const retry = useCallback(() => { if (latest.current) persist(latest.current); }, [persist]);
+  const loadFromBackup = useCallback((parsed) => persist(normalizeLoaded(parsed)), [persist]);
+  return { puppies, loading, persist, saveState, retry, storageAvailable, loadFromBackup };
+}
+
+function Chip({ children, tone = "muted" }) {
+  return <span className={`chip chip-${tone}`}>{children}</span>;
+}
+
+function quarantineInfo(puppy) {
+  const lastVacc = (puppy.log || [])
+    .filter((e) => e.type === "Вакцинация")
+    .sort((a, b) => (a.date > b.date ? -1 : 1))[0];
+  if (!lastVacc) return null;
+  const end = addDays(lastVacc.date, QUARANTINE_DAYS);
+  if (end < todayISO()) return null;
+  return { until: end };
+}
+
+function nextDueInfo(puppy, daysAhead = 30) {
+  const today = todayISO();
+  const future = addDays(today, daysAhead);
+  let best = null;
+  (puppy.log || []).forEach((e) => {
+    if (!e.nextDate || e.nextDate > future) return;
+    const overdue = e.nextDate < today;
+    if (!best || (overdue && !best.overdue) || (overdue === best.overdue && e.nextDate < best.date)) {
+      best = { overdue, date: e.nextDate, type: e.type };
+    }
+  });
+  return best;
+}
+
+function CareWarningBadges({ puppy }) {
+  const due = nextDueInfo(puppy);
+  const quarantine = quarantineInfo(puppy);
+  return (
+    <React.Fragment>
+      {due && (
+        <div className={`care-warning ${due.overdue ? "care-warning-overdue" : "care-warning-soon"}`}>
+          ⚠️ {due.overdue ? "Просрочено" : "Скоро"}: {due.type.toLowerCase()} · {fmtDate(due.date)}
+        </div>
+      )}
+      {quarantine && (
+        <div className="care-warning care-warning-quarantine">🚧 Карантин до {fmtDate(quarantine.until)}</div>
+      )}
+    </React.Fragment>
+  );
+}
+
+function PuppyRow({ puppy, onOpen }) {
+  const age = ageFromBirth(puppy.birthDate);
+  return (
+    <button className="list-row" onClick={() => onOpen(puppy.id)}>
+      <div className="list-icon">🐶</div>
+      <div className="list-body">
+        <div className="list-name">{puppy.name}</div>
+        <div className="list-meta">{[puppy.breed, age].filter(Boolean).join(" · ") || "нет данных"}</div>
+        <CareWarningBadges puppy={puppy} />
+      </div>
+      <div className="list-right">
+        <Chip tone={(puppy.log || []).length ? "good" : "muted"}>{(puppy.log || []).length || "нет"} записей</Chip>
+      </div>
+      <span className="list-chevron">›</span>
+    </button>
+  );
+}
+
+function Field({ label, children }) {
+  return <label className="field"><span className="field-label">{label}</span>{children}</label>;
+}
+
+function VaccinationLog({ list, onAdd, onRemove }) {
+  const [date, setDate] = useState(todayISO());
+  const [type, setType] = useState(VACC_TYPES[0]);
+  const [vaccine, setVaccine] = useState("");
+  const [manufacturer, setManufacturer] = useState("");
+  const [vet, setVet] = useState("");
+  const [nextDate, setNextDate] = useState("");
+  const [reaction, setReaction] = useState("");
+
+  const add = () => {
+    if (!vaccine.trim()) return;
+    onAdd({
+      id: uid("v"), date, type, vaccine: vaccine.trim(),
+      manufacturer: manufacturer.trim(), vet: vet.trim(),
+      nextDate, reaction: reaction.trim(),
+    });
+    setVaccine(""); setManufacturer(""); setVet(""); setNextDate(""); setReaction("");
+  };
+
+  const sorted = list.slice().sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  return (
+    <div className="section">
+      <div className="section-title">💉 Прививки и обработки</div>
+      <div className="log-list">
+        {sorted.length === 0 && <div className="empty-hint">Записей ещё нет.</div>}
+        {sorted.map((e) => (
+          <div key={e.id} className="log-row">
+            <span className="log-date">{fmtDate(e.date)}</span>
+            <Chip tone={VACC_TYPE_TONE[e.type]}>{VACC_TYPE_ICON[e.type]} {e.type}</Chip>
+            <span className="log-text">
+              {e.vaccine}
+              {e.manufacturer ? ` (${e.manufacturer})` : ""}
+              {e.vet ? ` · ${e.vet}` : ""}
+            </span>
+            {e.nextDate && <Chip tone={e.nextDate < todayISO() ? "danger" : "warn"}>повтор {fmtDate(e.nextDate)}</Chip>}
+            <button className="icon-btn" onClick={() => onRemove(e.id)}>✕</button>
+            {e.reaction && <div className="log-sub">⚠️ реакция: {e.reaction}</div>}
+          </div>
+        ))}
+      </div>
+      <div className="add-row">
+        <input type="date" className="input input-date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <select className="input" value={type} onChange={(e) => setType(e.target.value)}>
+          {VACC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="add-row">
+        <input className="input" placeholder="препарат (напр. Nobivac DHPPi)" value={vaccine} onChange={(e) => setVaccine(e.target.value)} />
+        <input className="input" placeholder="производитель / серия" value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} />
+      </div>
+      <div className="add-row">
+        <input className="input" placeholder="кто ставил (клиника/врач)" value={vet} onChange={(e) => setVet(e.target.value)} />
+        <Field label="след. раз"><input type="date" className="input input-date" value={nextDate} onChange={(e) => setNextDate(e.target.value)} /></Field>
+      </div>
+      <div className="add-row">
+        <input className="input" placeholder="реакция после прививки (если была)" value={reaction} onChange={(e) => setReaction(e.target.value)} />
+      </div>
+      <button className="add-btn add-btn-primary" style={{ marginTop: 8 }} onClick={add}>➕ Добавить запись</button>
+    </div>
+  );
+}
+
+function PuppyDetail({ puppy, onBack, onUpdate, onDelete }) {
+  const [local, setLocal] = useState(puppy);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const timers = useRef({});
+
+  useEffect(() => { setLocal(puppy); }, [puppy.id]);
+  useEffect(() => () => { Object.values(timers.current).forEach((t) => t && t.flush && t.flush()); }, []);
+
+  const commitNow = (patch) => { const next = { ...local, ...patch }; setLocal(next); onUpdate(next); };
+  const commitDebounced = (key, patch, delay = 500) => {
+    const next = { ...local, ...patch };
+    setLocal(next);
+    if (timers.current[key]) clearTimeout(timers.current[key].id);
+    const id = setTimeout(() => onUpdate(next), delay);
+    timers.current[key] = { id, flush: () => onUpdate(next) };
+  };
+  const handleBack = () => { Object.values(timers.current).forEach((t) => t && t.flush && t.flush()); onBack(); };
+
+  const addLog = (entry) => commitNow({ log: [...(local.log || []), entry] });
+  const removeLog = (id) => commitNow({ log: (local.log || []).filter((e) => e.id !== id) });
+
+  return (
+    <div className="detail">
+      <div className="detail-topbar">
+        <button className="back-btn" onClick={handleBack} title="Назад">‹</button>
+        <span className="detail-topbar-title">Карточка щенка</span>
+        <span style={{ width: 34 }}></span>
+      </div>
+      <div className="detail-body">
+        <input
+          className="detail-name-input"
+          defaultValue={local.name}
+          onChange={(e) => commitDebounced("name", { name: e.target.value })}
+          onBlur={() => timers.current.name && timers.current.name.flush()}
+          placeholder="Кличка"
+        />
+        <CareWarningBadges puppy={local} />
+
+        <div className="detail-grid">
+          <Field label="Порода">
+            <input className="input" defaultValue={local.breed} onChange={(e) => commitDebounced("breed", { breed: e.target.value })} onBlur={() => timers.current.breed && timers.current.breed.flush()} placeholder="напр. дворняга" />
+          </Field>
+          <Field label="Дата рождения (примерно)">
+            <input type="date" className="input" defaultValue={local.birthDate} onChange={(e) => commitDebounced("birthDate", { birthDate: e.target.value })} onBlur={() => timers.current.birthDate && timers.current.birthDate.flush()} />
+          </Field>
+          <Field label="Вес, кг">
+            <input className="input" defaultValue={local.weight} onChange={(e) => commitDebounced("weight", { weight: e.target.value })} onBlur={() => timers.current.weight && timers.current.weight.flush()} placeholder="напр. 3.2" />
+          </Field>
+        </div>
+
+        <VaccinationLog list={local.log || []} onAdd={addLog} onRemove={removeLog} />
+
+        <div className="section">
+          <div className="section-title">📝 Заметки</div>
+          <textarea
+            className="input textarea"
+            rows={3}
+            defaultValue={local.notes}
+            onChange={(e) => commitDebounced("notes", { notes: e.target.value })}
+            onBlur={() => timers.current.notes && timers.current.notes.flush()}
+            placeholder="особенности, аллергии, что учитывать при следующей прививке..."
+          />
+        </div>
+
+        <div className="danger-zone">
+          {!confirmDelete ? (
+            <button className="delete-btn" onClick={() => setConfirmDelete(true)}>🗑️ Удалить карточку</button>
+          ) : (
+            <div className="confirm-row">
+              <span>⚠️ Удалить карточку «{local.name}»?</span>
+              <button className="delete-btn-confirm" onClick={() => onDelete(local.id)}>Да, удалить</button>
+              <button className="cancel-btn" onClick={() => setConfirmDelete(false)}>Отмена</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function collectNotifications(puppies) {
+  const today = todayISO();
+  const in7 = addDays(today, 7);
+  const buckets = { overdue: [], today: [], soon: [] };
+  (puppies || []).forEach((p) => {
+    (p.log || []).forEach((e) => {
+      if (!e.nextDate) return;
+      const item = { puppyId: p.id, puppyName: p.name, type: e.type, date: e.nextDate };
+      if (e.nextDate < today) buckets.overdue.push(item);
+      else if (e.nextDate === today) buckets.today.push(item);
+      else if (e.nextDate <= in7) buckets.soon.push(item);
+    });
+  });
+  const total = buckets.overdue.length + buckets.today.length + buckets.soon.length;
+  return { ...buckets, total };
+}
+
+function NotificationsPanel({ puppies, onClose, onOpenPuppy }) {
+  const data = useMemo(() => collectNotifications(puppies), [puppies]);
+  const Section = ({ title, tone, items }) => {
+    if (items.length === 0) return null;
+    return (
+      <div className={`notif-section notif-section-${tone}`}>
+        <div className="notif-section-title">{title}</div>
+        {items.map((it, i) => (
+          <button key={i} className="notif-row" onClick={() => { onOpenPuppy(it.puppyId); onClose(); }}>
+            <span>{VACC_TYPE_ICON[it.type] || "💉"}</span>
+            <span className="notif-row-text">{it.puppyName} · {it.type}</span>
+            <span className="notif-row-date">{fmtDate(it.date)}</span>
+          </button>
+        ))}
+      </div>
+    );
+  };
+  return (
+    <div className="notif-overlay" onClick={onClose}>
+      <div className="notif-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="notif-panel-header">
+          <span>🔔 Уведомления</span>
+          <button className="round-icon-btn" onClick={onClose}>✕</button>
+        </div>
+        {data.total === 0 ? (
+          <div className="empty-hint" style={{ padding: 20 }}>Пока всё в порядке — просроченных и ближайших дел нет.</div>
+        ) : (
+          <div className="notif-body">
+            <Section title="Сегодня" tone="today" items={data.today} />
+            <Section title="Через 7 дней" tone="soon" items={data.soon} />
+            <Section title="Просрочено" tone="overdue" items={data.overdue} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const { puppies, loading, persist, saveState, retry, storageAvailable, loadFromBackup } = useDB();
+  const [openId, setOpenId] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [query, setQuery] = useState("");
+  const [dueFilter, setDueFilter] = useState(null);
+  const [importError, setImportError] = useState("");
+  const fileInputRef = useRef(null);
+
+  const filtered = useMemo(() => {
+    if (!puppies) return [];
+    return puppies.filter((p) => {
+      const matchesQuery = !query || p.name.toLowerCase().includes(query.toLowerCase());
+      let matchesDue = true;
+      if (dueFilter === "due") matchesDue = !!nextDueInfo(p);
+      if (dueFilter === "quarantine") matchesDue = !!quarantineInfo(p);
+      return matchesQuery && matchesDue;
+    });
+  }, [puppies, query, dueFilter]);
+
+  const openPuppy = openId && puppies ? puppies.find((p) => p.id === openId) : null;
+
+  const updatePuppy = (updated) => persist({ puppies: puppies.map((p) => (p.id === updated.id ? updated : p)) });
+  const deletePuppy = (id) => { persist({ puppies: puppies.filter((p) => p.id !== id) }); setOpenId(null); };
+  const addPuppy = () => {
+    const p = blankPuppy();
+    persist({ puppies: [...puppies, p] });
+    setOpenId(p.id);
+  };
+
+  const downloadBackup = () => {
+    const blob = new Blob([JSON.stringify({ puppies }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
+    a.href = url; a.download = `zhurnal-privivok-${stamp}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  };
+  const triggerImport = () => fileInputRef.current && fileInputRef.current.click();
+  const handleImportFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    setImportError("");
+    const reader = new FileReader();
+    reader.onload = () => {
+      try { loadFromBackup(JSON.parse(reader.result)); }
+      catch (err) { setImportError("Не получилось прочитать файл — убедитесь, что это резервная копия, скачанная отсюда же."); }
+    };
+    reader.onerror = () => setImportError("Не получилось прочитать файл.");
+    reader.readAsText(file);
+  };
+
+  const notifTotal = useMemo(() => (puppies ? collectNotifications(puppies).total : 0), [puppies]);
+  const dueCount = useMemo(() => (puppies ? puppies.filter((p) => nextDueInfo(p)).length : 0), [puppies]);
+  const quarantineCount = useMemo(() => (puppies ? puppies.filter((p) => quarantineInfo(p)).length : 0), [puppies]);
+
+  if (loading || !puppies) {
+    return <div className="app-shell loading-shell"><div className="loading-text">💉 Открываем журнал…</div></div>;
+  }
+
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="app-header-left">
+          <div className="app-icon">💉</div>
+          <div>
+            <div className="app-title">Журнал прививок</div>
+            <div className="app-subtitle">{puppies.length} щенков</div>
+          </div>
+        </div>
+        <div>
+          {saveState === "saved" && "✅"}
+          {saveState === "error" && <button className="retry-btn" onClick={retry}>🔄 повторить</button>}
+          {saveState === "local" && <button className="retry-btn" onClick={retry}>📴 офлайн</button>}
+          {(saveState === "idle" || saveState === "saving") && (
+            <button className="bell-btn" onClick={() => setShowNotifications(true)}>🔔{notifTotal > 0 && <span className="bell-dot"></span>}</button>
+          )}
+        </div>
+      </header>
+
+      {saveState === "error" && (
+        <div className="error-banner">⚠️ Последнее изменение не сохранилось. Нажмите «повторить» справа вверху.</div>
+      )}
+      {!storageAvailable && (
+        <div className="local-banner">
+          <span>📴</span>
+          <div className="local-banner-text">Нет связи с общей базой — изменения хранятся только на этом экране.</div>
+          <div className="backup-actions">
+            <button className="backup-btn backup-btn-primary" onClick={downloadBackup}>⬇️ Скачать копию</button>
+            <button className="backup-btn backup-btn-secondary" onClick={triggerImport}>⬆️ Загрузить копию</button>
+          </div>
+          {importError && <div className="import-error">{importError}</div>}
+          <input ref={fileInputRef} type="file" accept="application/json" className="hidden-file-input" onChange={handleImportFile} />
+        </div>
+      )}
+      {storageAvailable && (
+        <div className="backup-actions backup-actions-inline">
+          <button className="backup-btn backup-btn-primary" onClick={downloadBackup}>⬇️ Скачать копию</button>
+          <button className="backup-btn backup-btn-secondary" onClick={triggerImport}>⬆️ Загрузить копию</button>
+          {importError && <div className="import-error">{importError}</div>}
+          <input ref={fileInputRef} type="file" accept="application/json" className="hidden-file-input" onChange={handleImportFile} />
+        </div>
+      )}
+
+      {!openPuppy ? (
+        <React.Fragment>
+          <div className="stats-row">
+            <button className={`stat-tile ${dueFilter === null ? "active" : ""}`} style={{ "--tile-color": "var(--teal-dark)", "--tile-soft": "var(--teal-soft)" }} onClick={() => setDueFilter(null)}>
+              <span className="stat-icon">🐶</span><span className="stat-num">{puppies.length}</span><span className="stat-label">Всего щенков</span>
+            </button>
+            <button className={`stat-tile ${dueFilter === "due" ? "active" : ""}`} style={{ "--tile-color": "var(--amber-dark)", "--tile-soft": "var(--amber-soft)" }} onClick={() => setDueFilter(dueFilter === "due" ? null : "due")}>
+              <span className="stat-icon">⚠️</span><span className="stat-num">{dueCount}</span><span className="stat-label">Скоро/просрочено</span>
+            </button>
+            <button className={`stat-tile ${dueFilter === "quarantine" ? "active" : ""}`} style={{ "--tile-color": "var(--purple-dark)", "--tile-soft": "var(--purple-soft)" }} onClick={() => setDueFilter(dueFilter === "quarantine" ? null : "quarantine")}>
+              <span className="stat-icon">🚧</span><span className="stat-num">{quarantineCount}</span><span className="stat-label">На карантине</span>
+            </button>
+          </div>
+
+          <div className="toolbar">
+            <div className="search-box">
+              <span>🔍</span>
+              <input className="search-input" placeholder="Поиск по кличке..." value={query} onChange={(e) => setQuery(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="list-col">
+            {filtered.map((p) => <PuppyRow key={p.id} puppy={p} onOpen={setOpenId} />)}
+            {filtered.length === 0 && <div className="empty-hint" style={{ padding: 24 }}>Ничего не найдено. Нажмите ➕, чтобы добавить щенка.</div>}
+          </div>
+
+          <button className="fab" onClick={addPuppy} title="Добавить щенка">➕</button>
+        </React.Fragment>
+      ) : (
+        <PuppyDetail puppy={openPuppy} onBack={() => setOpenId(null)} onUpdate={updatePuppy} onDelete={deletePuppy} />
+      )}
+
+      {showNotifications && (
+        <NotificationsPanel puppies={puppies} onClose={() => setShowNotifications(false)} onOpenPuppy={setOpenId} />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch((e) => console.error("SW registration failed:", e));
+  });
+}
+</script>
+</body>
+</html>
